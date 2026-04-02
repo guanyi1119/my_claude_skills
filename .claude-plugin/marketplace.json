@@ -1,0 +1,22 @@
+{
+  "name": "my-claude-skills",
+  "owner": {
+    "name": "Guanyi Zhao",
+    "email": "guanyi.zhao@qq.com"
+  },
+  "metadata": {
+    "description": "Some skills created by myself",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "paper-interpreter",
+      "description": "To read, analyze and archive papers.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/paper-interpreter"
+      ]
+    }
+  ]
+}
