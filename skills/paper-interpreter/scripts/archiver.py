@@ -41,17 +41,20 @@ def sanitize_filename(filename):
     return sanitized
 
 
-def get_archive_paths(base_dir):
+def get_archive_paths(base_dir=None):
     """
     获取归档目录的路径
 
     Args:
-        base_dir: 基础目录
+        base_dir: 基础目录（可选，为了向后兼容）。如果未提供，则使用当前工作目录。
 
     Returns:
         包含各种路径的字典
     """
-    archive_dir = os.path.join(base_dir, 'archive')
+    if base_dir is None:
+        base_dir = os.getcwd()
+
+    archive_dir = os.path.join(base_dir, 'paper_archive')
     pdf_dir = os.path.join(archive_dir, 'pdf')
     md_dir = os.path.join(archive_dir, 'md')
     excel_path = os.path.join(archive_dir, 'paper_archive.xlsx')
@@ -158,12 +161,12 @@ def add_hyperlink(ws, row, col, display_text, file_path):
     cell.style = 'Hyperlink'
 
 
-def archive_paper(base_dir, paper_info, source_pdf_path, source_md_path, tag, archive_reason):
+def archive_paper(base_dir, paper_info, source_pdf_path, source_md_path, tag, archive_reason, delete_original=False):
     """
     归档论文
 
     Args:
-        base_dir: 基础目录
+        base_dir: 基础目录（为了向后兼容，实际使用时会优先使用当前工作目录）
         paper_info: 论文信息字典
         paper_info = {
             'title': 论文标题,
@@ -177,13 +180,14 @@ def archive_paper(base_dir, paper_info, source_pdf_path, source_md_path, tag, ar
         source_md_path: 源MD文件路径
         tag: 归档标签
         archive_reason: 归档原因
+        delete_original: 是否删除原始文件（默认False）
 
     Returns:
         成功返回True，失败返回False
     """
     try:
-        # 获取路径
-        paths = get_archive_paths(base_dir)
+        # 获取路径（不使用传入的base_dir，而是使用当前工作目录）
+        paths = get_archive_paths()
         ensure_archive_directories(paths)
 
         # 清理标题用于文件名
@@ -241,6 +245,11 @@ def archive_paper(base_dir, paper_info, source_pdf_path, source_md_path, tag, ar
         # 保存Excel
         wb.save(paths['excel_path'])
 
+        # 删除原始文件（如果指定）
+        if delete_original:
+            print("正在删除原始文件...")
+            delete_files(source_pdf_path, source_md_path)
+
         print(f"论文已成功归档到标签: {tag}")
         print(f"Excel文件: {paths['excel_path']}")
         print(f"PDF文件: {target_pdf_path}")
@@ -280,7 +289,7 @@ def main():
 
     # 测试创建Excel
     test_parser = subparsers.add_parser('test', help='测试归档功能')
-    test_parser.add_argument('--base-dir', required=True, help='基础目录')
+    test_parser.add_argument('--base-dir', help='基础目录（可选，默认使用当前工作目录）')
     test_parser.add_argument('--title', required=True, help='论文标题')
     test_parser.add_argument('--year', help='年份')
     test_parser.add_argument('--affiliation', help='作者单位')
@@ -290,6 +299,7 @@ def main():
     test_parser.add_argument('--reason', required=True, help='归档原因')
     test_parser.add_argument('--pdf', help='PDF文件路径')
     test_parser.add_argument('--md', help='MD文件路径')
+    test_parser.add_argument('--delete-original', action='store_true', help='归档后删除原始文件')
 
     args = parser.parse_args()
 
@@ -308,7 +318,8 @@ def main():
             source_pdf_path=args.pdf,
             source_md_path=args.md,
             tag=args.tag,
-            archive_reason=args.reason
+            archive_reason=args.reason,
+            delete_original=args.delete_original
         )
 
 

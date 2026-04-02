@@ -29,11 +29,17 @@ paper-interpreter/
 │   └── paper_analysis_template.md    # 论文分析模板
 ├── evals/
 │   └── evals.json                    # 测试用例
-├── archive/                          # 归档目录（运行时创建）
-│   ├── paper_archive.xlsx           # 归档Excel文件
-│   ├── pdf/                          # 论文PDF文件
-│   └── md/                           # 论文解读报告
 └── interpretations/                  # 临时解析结果目录（运行时创建）
+```
+
+## 归档位置（运行时创建）
+
+```
+{project_workspace}/
+└── paper_archive/                    # 归档目录（位于当前工作目录）
+    ├── paper_archive.xlsx           # 归档Excel文件
+    ├── pdf/                          # 论文PDF文件
+    └── md/                           # 论文解读报告
 ```
 
 ## 安装依赖
@@ -86,23 +92,35 @@ pip install pdfplumber openpyxl
 在解析完成后，skill会询问是否需要归档论文：
 
 #### 如果不归档
-- 删除临时生成的PDF和MD文件
-- 删除临时提取的文本文件
-- 结束流程
+根据文件来源进行不同处理：
+
+- **临时文件（在线链接下载）**：
+  - 删除临时生成的PDF和MD文件
+  - 删除临时提取的文本文件
+  - 结束流程
+
+- **本地文件（用户提供的本地PDF）**：
+  - 询问用户如何处理文件，提供选项：
+    1. 删除所有临时文件，但保留原始PDF
+    2. 删除所有文件（包括原始PDF）
+    3. 保留所有文件（不删除任何文件）
 
 #### 如果归档
 1. **输入归档原因**：描述为什么要归档这篇论文
 2. **输入归档标签**：用于分类（如"计算机视觉"、"自然语言处理"等）
 3. **自动处理**：
-   - 创建/更新Excel归档文件
+   - 创建/更新Excel归档文件（保存到当前工作目录的paper_archive文件夹）
    - 重命名并保存文件到对应目录
    - 添加超链接到Excel文件
+4. **原始文件处理**：
+   - 对于临时下载的PDF文件：归档后自动删除原始文件
+   - 对于本地PDF文件：询问用户是否删除原始文件
 
 ### 归档文件位置
 
-- **Excel文件**：`d:\Workspace\PaperReader\paper-interpreter\archive\paper_archive.xlsx`
-- **PDF文件**：`d:\Workspace\PaperReader\paper-interpreter\archive\pdf\`（重命名后的）
-- **解读报告**：`d:\Workspace\PaperReader\paper-interpreter\archive\md\`（重命名后的）
+- **Excel文件**：`{project_workspace}/paper_archive/paper_archive.xlsx`（位于当前工作目录下）
+- **PDF文件**：`{project_workspace}/paper_archive/pdf/`（重命名后的）
+- **解读报告**：`{project_workspace}/paper_archive/md/`（重命名后的）
 
 ### Excel文件结构
 
